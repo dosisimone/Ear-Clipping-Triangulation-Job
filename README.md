@@ -23,7 +23,7 @@ Create and Schedule the job defining if the polygon is winded counter-clockwise 
 ```C#
 EarClippingNoHolesJob triangulatorJob = new EarClippingNoHolesJob()
 {
-    isCCW = false,
+    isCCW = true,
     InPoints = verts,
     OutTris = outTriangles
 };
