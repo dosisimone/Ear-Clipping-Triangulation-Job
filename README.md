@@ -24,19 +24,19 @@ Create and Schedule the job defining if the polygon is winded counter-clockwise 
 EarClippingNoHolesJob triangulatorJob = new EarClippingNoHolesJob()
 {
     isCCW = true,
-    InPoints = verts,
+    InVerts = verts,
     OutTris = outTriangles
 };
-JobHandle handle = triangulatorJob.Schedule();       
+JobHandle handle = triangulatorJob.Schedule();        
 ```       
 
 When the job is completed get the triangles.
 ```C#
-int[] triangles = new int[tris.Length];
-for (int i = 0; i < tris.Length; ++i)
+int[] triangles = new int[outTriangles.Length];
+for (int i = 0; i < outTriangles.Length; ++i)
 {
     triangles[i] = outTriangles[i];
-}   
+}  
 ``` 
 
 Dispose every native collection used.

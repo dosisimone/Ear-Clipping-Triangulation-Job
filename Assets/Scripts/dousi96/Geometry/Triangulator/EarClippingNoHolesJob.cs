@@ -16,7 +16,7 @@ namespace dousi96.Geometry.Triangulator
         [ReadOnly]
         public bool isCCW;
         [ReadOnly]
-        public NativeArray<float2> InPoints;
+        public NativeArray<float2> InVerts;
         [WriteOnly]
         public NativeArray<int> OutTris;
 
@@ -24,7 +24,7 @@ namespace dousi96.Geometry.Triangulator
         {
             NativeQueue<int> indexesQueue = new NativeQueue<int>(Allocator.Temp);
 
-            for (int i = 0; i < InPoints.Length; ++i)
+            for (int i = 0; i < InVerts.Length; ++i)
             {
                 indexesQueue.Enqueue(i);
             }
@@ -37,7 +37,7 @@ namespace dousi96.Geometry.Triangulator
                 int iNext = indexesQueue.Dequeue();
 
                 //check if the current vertex is an interior one
-                if (!Geometry2DUtils.IsVertexConvex(InPoints[iPrev], InPoints[iCur], InPoints[iNext], isCCW))
+                if (!Geometry2DUtils.IsVertexConvex(InVerts[iPrev], InVerts[iCur], InVerts[iNext], isCCW))
                 {
                     indexesQueue.Enqueue(iPrev);
                     indexesQueue.Enqueue(iCur);
@@ -47,14 +47,14 @@ namespace dousi96.Geometry.Triangulator
 
                 //check if any point inside the found triangle
                 bool pointInsideTriangleExists = false;
-                for (int j = 0; j < InPoints.Length; ++j)
+                for (int j = 0; j < InVerts.Length; ++j)
                 {
                     if (j == iPrev || j == iCur || j == iNext)
                     {
                         continue;
                     }
 
-                    pointInsideTriangleExists |= Geometry2DUtils.IsInsideTriangle(InPoints[j], InPoints[iPrev], InPoints[iCur], InPoints[iNext]);
+                    pointInsideTriangleExists |= Geometry2DUtils.IsInsideTriangle(InVerts[j], InVerts[iPrev], InVerts[iCur], InVerts[iNext]);
                 }
 
                 if (pointInsideTriangleExists)

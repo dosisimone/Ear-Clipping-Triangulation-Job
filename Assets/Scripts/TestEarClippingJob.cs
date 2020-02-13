@@ -15,26 +15,21 @@ public class TestEarClippingJob : MonoBehaviour
     {
         filter = GetComponent<MeshFilter>();
 
-        NativeArray<float2> verts = new NativeArray<float2>(8, Allocator.TempJob);
-        verts[7] = new float2(0f, 0f);
-        verts[6] = new float2(1f, 0f);
-        verts[5] = new float2(1f, 1f);
-        verts[4] = new float2(2f, 1f);
-        verts[3] = new float2(2f, 3f);
-        verts[2] = new float2(0f, 2f);
-        verts[1] = new float2(0.5f, 1.25f);
-        verts[0] = new float2(-0.5f, 1.5f);
+        NativeArray<float2> verts = new NativeArray<float2>(4, Allocator.TempJob);
+        verts[0] = new float2(0f, 0f);
+        verts[1] = new float2(1f, 0f);
+        verts[2] = new float2(1f, 1f);
+        verts[3] = new float2(0f, 1f);
 
         int ntris = (verts.Length - 2) * 3;
-        NativeArray<int> tris = new NativeArray<int>(ntris, Allocator.TempJob);
-        NativeQueue<int> indexesQueue = new NativeQueue<int>(Allocator.TempJob);
+        NativeArray<int> outTriangles = new NativeArray<int>(ntris, Allocator.TempJob);
 
         //creating the job
         EarClippingNoHolesJob triangulatorJob = new EarClippingNoHolesJob()
         {
-            isCCW = false,
-            InPoints = verts,
-            OutTris = tris
+            isCCW = true,
+            InVerts = verts,
+            OutTris = outTriangles
         };
         JobHandle handle = triangulatorJob.Schedule();       
         handle.Complete();
@@ -46,15 +41,14 @@ public class TestEarClippingJob : MonoBehaviour
         }
 
         //get the job results
-        int[] triangles = new int[tris.Length];
-        for (int i = 0; i < tris.Length; ++i)
+        int[] triangles = new int[outTriangles.Length];
+        for (int i = 0; i < outTriangles.Length; ++i)
         {
-            triangles[i] = tris[i];
+            triangles[i] = outTriangles[i];
         }
 
         verts.Dispose();
-        indexesQueue.Dispose();
-        tris.Dispose();
+        outTriangles.Dispose();
 
         filter.sharedMesh = new Mesh();
         filter.sharedMesh.vertices = vertices;
