@@ -46,5 +46,5 @@ outTriangles.Dispose();
 ``` 
 
 ## Limitations
-- Doesn't support polygons with holes
+- No holes support
 - Not compatible with the Burst compiler
