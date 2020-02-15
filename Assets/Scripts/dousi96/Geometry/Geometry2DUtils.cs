@@ -1,9 +1,11 @@
 ﻿using Unity.Mathematics;
+using Unity.Burst;
 
 namespace dousi96.Geometry 
 {
     public static class Geometry2DUtils
-    {        
+    {
+        [BurstCompile]
         public static bool IsVertexConvex(float2 prevP0, float2 P0, float2 nextP0, bool isCCW)
         {
             float2x2 m = new float2x2
@@ -22,6 +24,7 @@ namespace dousi96.Geometry
             }
         }
 
+        [BurstCompile]
         public static float TriangleArea(float2 p0, float2 p1, float2 p2)
         {
             return math.mul(
@@ -32,6 +35,7 @@ namespace dousi96.Geometry
                 ), 0.5f);
         }
 
+        [BurstCompile]
         public static bool IsInsideTriangle(float2 p, float2 t0, float2 t1, float2 t2)
         {
             float A = TriangleArea(t0, t1, t2);
@@ -41,54 +45,45 @@ namespace dousi96.Geometry
             return math.abs(A - Apt1t2 - At0pt2 - At0t1p) <= float.Epsilon;
         }
 
+        [BurstCompile]
         public static bool SegmentIntersection(float2 a0, float2 a1, float2 b0, float2 b1, out float2 intersection)
         {
             intersection = new float2();
 
-            float2 Ia = new float2()
-            {
-                x = math.min(a0.x, a1.x),
-                y = math.max(a0.x, a1.x)
-            };
+            float2 r = a1 - a0;
+            float2 s = b1 - b0;
 
-            float2 Ib = new float2()
-            {
-                x = math.min(b0.x, b1.x),
-                y = math.max(b0.x, b1.x)
-            };
+            float RxS = Cross2D(r, s);
+            float QminusPxR = Cross2D(b0 - a0, r);
+            float QminusPxS = Cross2D(b0 - a0, s);
+            float t = QminusPxS / RxS;
+            float u = QminusPxR / RxS;            
 
-            if (Ia.y < Ib.x)
+            bool isRxS0 = math.abs(RxS) <= float.Epsilon;
+            bool isQminusPxR0 = math.abs(QminusPxR) <= float.Epsilon;
+            if (isRxS0 && isQminusPxR0)
             {
+                //collinear
+
+            }
+            else if (isRxS0 && !isQminusPxR0)
+            {
+                //parallel lines
                 return false;
             }
-
-            float A1 = (a0.y - a1.y) / (a0.x - a1.x);
-            float A2 = (b0.y - b1.y) / (b0.x - b1.x);
-
-            //the segments are parallel
-            if (math.abs(A1 - A2) <= float.Epsilon)
+            else if (!isRxS0 && t >= 0 && t <=1 && u >= 0 && u <= 1)
             {
-                return false;
+                intersection = a0 + t * r;
+                return true;
             }
+            //no intersection
+            return false;
+        }
 
-            float B1 = a0.y - A1 * a0.x;
-            float B2 = b0.y - A2 * b0.x;
-
-            intersection.x = (B2 - B1) / (A1 - A2);
-            intersection.y = A1 * intersection.x + B1;
-
-            float2 I = new float2()
-            {
-                x = math.max(Ia.x, Ib.x),
-                y = math.min(Ia.y, Ib.y)
-            };
-
-            bool intersectionPointNotValid = intersection.x < I.x || intersection.x > I.y;
-            if (intersectionPointNotValid)
-            {
-                return false;
-            }
-            return true;
+        [BurstCompile]
+        public static float Cross2D(float2 a, float2 b)
+        {
+            return math.mul(a.x, b.y) - math.mul(a.y, b.x);
         }
     }
 }
