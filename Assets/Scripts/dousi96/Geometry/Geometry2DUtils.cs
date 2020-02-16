@@ -10,18 +10,31 @@ namespace dousi96.Geometry
         {
             float2x2 m = new float2x2
             {
-                c0 = prevP0 - P0,
+                c0 = P0 - prevP0,
                 c1 = nextP0 - P0
             };
             float det = math.determinant(m);
             if (isCCW)
             {
-                return det <= 0;
+                return det > 0;
             }
-            else
+            return det < 0;
+        }
+
+        [BurstCompile]
+        public static bool IsVertexReflex(float2 prevP0, float2 P0, float2 nextP0, bool isCCW)
+        {
+            float2x2 m = new float2x2
             {
-                return det >= 0;
+                c0 = P0 - prevP0,
+                c1 = nextP0 - P0
+            };
+            float det = math.determinant(m);
+            if (isCCW)
+            {
+                return det < 0;
             }
+            return det > 0;
         }
 
         [BurstCompile]

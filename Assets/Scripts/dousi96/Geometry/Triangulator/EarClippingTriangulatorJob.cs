@@ -1,10 +1,8 @@
 ﻿using Unity.Jobs;
 using Unity.Burst;
 using Unity.Collections;
-using Unity.Mathematics;
 
 using JacksonDunstan.NativeCollections;
-
 
 namespace dousi96.Geometry.Triangulator
 {
@@ -19,9 +17,7 @@ namespace dousi96.Geometry.Triangulator
         /// Are the points winded in a counter-clockwise order
         /// </summary>
         [ReadOnly]
-        public bool isCCW;
-        [ReadOnly]
-        public NativeArray<float2> Vertices;
+        public PolygonJobData Polygon;
         public NativeLinkedList<int> VertexIndexLinkedList;
         [WriteOnly]
         public NativeArray<int> OutTris;
@@ -42,7 +38,7 @@ namespace dousi96.Geometry.Triangulator
                 int iNext = (!cur.Next.IsValid) ? VertexIndexLinkedList.Head.Value : cur.Next.Value;
 
                 //check if the current vertex is an interior one
-                if (!Geometry2DUtils.IsVertexConvex(Vertices[iPrev], Vertices[iCur], Vertices[iNext], isCCW))
+                if (!Geometry2DUtils.IsVertexConvex(Polygon.Vertices[iPrev], Polygon.Vertices[iCur], Polygon.Vertices[iNext], true))
                 {
                     cur.MoveNext();
                     continue;
@@ -50,14 +46,13 @@ namespace dousi96.Geometry.Triangulator
 
                 //check if any point inside the found triangle
                 bool pointInsideTriangleExists = false;
-                for (int j = 0; j < Vertices.Length; ++j)
+                for (int j = 0; j < Polygon.NumTotVertices; ++j)
                 {
                     if (j == iPrev || j == iCur || j == iNext)
                     {
                         continue;
                     }
-
-                    pointInsideTriangleExists |= Geometry2DUtils.IsInsideTriangle(Vertices[j], Vertices[iPrev], Vertices[iCur], Vertices[iNext]);
+                    pointInsideTriangleExists |= Geometry2DUtils.IsInsideTriangle(Polygon.Vertices[j], Polygon.Vertices[iPrev], Polygon.Vertices[iCur], Polygon.Vertices[iNext]);
                 }
 
                 if (pointInsideTriangleExists)
@@ -66,9 +61,10 @@ namespace dousi96.Geometry.Triangulator
                     continue;
                 }
 
-                OutTris[trisIndex]      = iPrev;
+                //create the tris
+                OutTris[trisIndex]      = iNext;
                 OutTris[trisIndex + 1]  = iCur;
-                OutTris[trisIndex + 2]  = iNext;
+                OutTris[trisIndex + 2]  = iPrev;
                 trisIndex += 3;
 
                 VertexIndexLinkedList.Remove(cur);
