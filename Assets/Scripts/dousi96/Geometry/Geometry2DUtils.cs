@@ -59,7 +59,7 @@ namespace dousi96.Geometry
         }
 
         [BurstCompile]
-        public static bool SegmentIntersection(float2 a0, float2 a1, float2 b0, float2 b1, out float2 intersection)
+        public static bool SegmentsIntersection(float2 a0, float2 a1, float2 b0, float2 b1, out float2 intersection)
         {
             intersection = new float2();
 
@@ -77,7 +77,6 @@ namespace dousi96.Geometry
             if (isRxS0 && isQminusPxR0)
             {
                 //collinear
-
             }
             else if (isRxS0 && !isQminusPxR0)
             {

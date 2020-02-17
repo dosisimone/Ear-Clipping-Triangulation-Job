@@ -69,7 +69,7 @@ namespace dousi96.Geometry.Triangulator
 
                     //intersect the ray
                     float2 I;
-                    bool areSegmentsIntersecting = Geometry2DUtils.SegmentIntersection(M, new float2(maxRayLength, M.y), Polygon.Vertices[contournEnum.Value], Polygon.Vertices[contournNextEnum.Value], out I);
+                    bool areSegmentsIntersecting = Geometry2DUtils.SegmentsIntersection(M, new float2(maxRayLength, M.y), Polygon.Vertices[contournEnum.Value], Polygon.Vertices[contournNextEnum.Value], out I);
                     if (!areSegmentsIntersecting)
                     {
                         continue;
@@ -82,7 +82,7 @@ namespace dousi96.Geometry.Triangulator
                         break;
                     }
 
-                    //I is an interior point of the edge <V(i), V(i+1)>, select P as the maximum x-value enpoint of the edge
+                    //I is an interior point of the edge <V(i), V(i+1)>, select P as the maximum x-value endpoint of the edge
                     NativeLinkedList<int>.Enumerator P = (Polygon.Vertices[contournEnum.Value].x > Polygon.Vertices[contournNextEnum.Value].x) ? contournEnum : contournNextEnum;
 
                     //Search the reflex vertices of the outer polygon (not including P if it happens to be reflex)                    
