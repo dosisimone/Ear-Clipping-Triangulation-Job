@@ -54,6 +54,13 @@ public class TestEarClippingJob : MonoBehaviour
                 new Vector2(+2f, +0f),
                 new Vector2(+1f, -1f),
             },
+            new Vector2[]
+            {
+                new Vector2(-1.25f, +1f),
+                new Vector2(-1.5f, +0f),
+                new Vector2(-1.25f, -1f),
+                new Vector2(-2.5f, +0f),                
+            },
         };
 
         polygon = new PolygonJobData(contourn1, holes, Allocator.TempJob);
