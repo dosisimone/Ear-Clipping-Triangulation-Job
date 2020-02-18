@@ -1,50 +1,61 @@
-# Ear Clipping Triangulation Jobs
+# Ear Clipping Triangulation Job
 
-Implementation of the Triangulation by Ear Clipping with the Unity Job System.
-The basic algorithm is explained in [this paper](http://www.geometrictools.com/Documentation/TriangulationByEarClipping.pdf)
+Implementation of the Triangulation by Ear Clipping inside the Job System.
+The basic algorithm is explained in [this paper](http://www.geometrictools.com/Documentation/TriangulationByEarClipping.pdf).
 
 ## How to use it
-Define and populate the NativeArray<float2> containing the vertices of the polygon.
+
+Initialize the ```PolygonJobData``` structure using one of the 2 constructors available.
+
 ```C#
-NativeArray<float2> verts = new NativeArray<float2>(4, Allocator.TempJob);
-verts[0] = new float2(0f, 0f);
-verts[1] = new float2(1f, 0f);
-verts[2] = new float2(1f, 1f);
-verts[3] = new float2(0f, 1f);
+PolygonJobData (Vector2[] contour, Allocator allocator)
+PolygonJobData (Vector2[] contour, Vector2[][] holes, Allocator allocator)
 ```
 
-Define the NativeArray<int> that will contain the triangles of the mesh as output of the job.
+The contour points array must be in **counter-clockwise order**.
+
+The points of every hole inside the holes array must be in **clockwise order**.
+
+Define the ```NativeArray``` that will contain the triangles indexes as the output of the job.
+
 ```C#
-int ntris = (verts.Length - 2) * 3;
+int totNumVerts = polygon.NumHoles * 2 + polygon.NumTotVertices;
+int ntris = (totNumVerts - 2) * 3;
 NativeArray<int> outTriangles = new NativeArray<int>(ntris, Allocator.TempJob);
 ```
 
-Create and Schedule the job defining if the polygon is winded counter-clockwise or not.
-```C#
-EarClippingNoHolesJob triangulatorJob = new EarClippingNoHolesJob()
-{
-    isCCW = true,
-    InVerts = verts,
-    OutTris = outTriangles
-};
-JobHandle handle = triangulatorJob.Schedule();        
-```       
+Create and schedule the ```EarClippingTriangulatorJob```.
 
-When the job is completed get the triangles.
+```C#
+EarClippingTriangulatorJob triangulatorJob = new EarClippingTriangulatorJob()
+{
+    Polygon = polygon,
+    OutTriangles = outTriangles
+};
+JobHandle handle = triangulatorJob.Schedule();
+```
+
+When the job is completed you can get the triangles.
+
 ```C#
 int[] triangles = new int[outTriangles.Length];
 for (int i = 0; i < outTriangles.Length; ++i)
 {
     triangles[i] = outTriangles[i];
 }  
-``` 
+```
 
-Dispose every native collection used.
+Dispose the polygon data structure and the triangles native collection used previously.
+
 ```C#
-verts.Dispose();
+polygon.Dispose();
 outTriangles.Dispose();
-``` 
+```
 
-## Limitations
-- No holes support
-- Not compatible with the Burst compiler
+Consider to take a look at the [TestEarClippingJob script](./Assets/Scripts/TestEarClippingJob.cs) to see the algorithm in action.
+
+### Limitations
+
+The implementation of this algorithm inside the Unity's job system is based on the [Jackson Dunstan](http://github.com/jacksondunstan) implementation of the Linked List data structure as a native collection.
+[Here the link](http://github.com/jacksondunstan/NativeCollections) to the Jackson Dunstan repository containing his implementation of the Linked List data structure and many other data structures.
+To use this implementation of the Triangulation by Ear Clipping you need to enable the "unsafe" code execution inside the Unity project settings.
