@@ -13,45 +13,45 @@ namespace dousi96.Geometry.Triangulator
         public readonly NativeArray<float2> Vertices;
         public int NumTotVertices { get => Vertices.Length; }
         [ReadOnly]
-        public readonly int NumContournPoints;
+        public readonly int NumContourPoints;
         [ReadOnly]
         public readonly NativeArray<int> StartPointsHoles;
         [ReadOnly]
         public readonly NativeArray<int> NumPointsPerHole;
         public int NumHoles { get => StartPointsHoles.Length; }
 
-        public PolygonJobData(Vector2[] contourn, Allocator allocator)
+        public PolygonJobData(Vector2[] contour, Allocator allocator)
         {
-            Vertices = new NativeArray<float2>(contourn.Length, allocator);
-            NumContournPoints = contourn.Length;
+            Vertices = new NativeArray<float2>(contour.Length, allocator);
+            NumContourPoints = contour.Length;
             StartPointsHoles = new NativeArray<int>(0, allocator);
             NumPointsPerHole = new NativeArray<int>(0, allocator);
 
-            for (int i = 0; i < contourn.Length; ++i)
+            for (int i = 0; i < contour.Length; ++i)
             {
-                Vertices[i] = contourn[i];
+                Vertices[i] = contour[i];
             }
         }
 
-        public PolygonJobData (Vector2[] contourn, Vector2[][]holes, Allocator allocator)
+        public PolygonJobData (Vector2[] contour, Vector2[][] holes, Allocator allocator)
         {
-            int vertsCount = contourn.Length;            
+            int vertsCount = contour.Length;            
             for (int i = 0; i < holes.Length; ++i)
             {
                 vertsCount += holes[i].Length;
             }
 
             Vertices = new NativeArray<float2>(vertsCount, allocator);
-            NumContournPoints = contourn.Length;
+            NumContourPoints = contour.Length;
             StartPointsHoles = new NativeArray<int>(holes.Length, allocator);
             NumPointsPerHole = new NativeArray<int>(holes.Length, allocator);
 
-            for (int i = 0; i < contourn.Length; ++i)
+            for (int i = 0; i < contour.Length; ++i)
             {
-                Vertices[i] = contourn[i];
+                Vertices[i] = contour[i];
             }
 
-            int startIndex = contourn.Length;
+            int startIndex = contour.Length;
             for (int i = 0; i < holes.Length; ++i)
             {
                 StartPointsHoles[i] = startIndex;

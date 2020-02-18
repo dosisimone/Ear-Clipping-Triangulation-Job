@@ -22,10 +22,10 @@ namespace dousi96.Geometry.Triangulator
         {
             int totNumVerts = Polygon.NumHoles * 2 + Polygon.NumTotVertices;
             NativeLinkedList<int> VertexIndexLinkedList = new NativeLinkedList<int>(totNumVerts, Allocator.Temp);
-            //add contourn points to the vertices linked list and set the max ray length
+            //add contour points to the vertices linked list and set the max ray length
             float minx = float.MaxValue;
             float maxx = float.MinValue;
-            for (int i = 0; i < Polygon.NumContournPoints; ++i)
+            for (int i = 0; i < Polygon.NumContourPoints; ++i)
             {
                 VertexIndexLinkedList.InsertAfter(VertexIndexLinkedList.Tail, i);
                 if (Polygon.Vertices[i].x < minx)
@@ -69,15 +69,15 @@ namespace dousi96.Geometry.Triangulator
                     float2 I = new float2();
                     NativeLinkedList<int>.Enumerator vi = VertexIndexLinkedList.Head;
 
-                    for (NativeLinkedList<int>.Enumerator contournEnum = VertexIndexLinkedList.Head;
-                        contournEnum.IsValid;
-                        contournEnum.MoveNext())
+                    for (NativeLinkedList<int>.Enumerator contourEnum = VertexIndexLinkedList.Head;
+                        contourEnum.IsValid;
+                        contourEnum.MoveNext())
                     {
-                        NativeLinkedList<int>.Enumerator contournNextEnum = (!contournEnum.Next.IsValid) ? VertexIndexLinkedList.Head : contournEnum.Next;
+                        NativeLinkedList<int>.Enumerator contourNextEnum = (!contourEnum.Next.IsValid) ? VertexIndexLinkedList.Head : contourEnum.Next;
 
                         //intersect the ray
                         float2 intersection;
-                        bool areSegmentsIntersecting = Geometry2DUtils.SegmentsIntersection(M, new float2(maxRayLength, M.y), Polygon.Vertices[contournEnum.Value], Polygon.Vertices[contournNextEnum.Value], out intersection);
+                        bool areSegmentsIntersecting = Geometry2DUtils.SegmentsIntersection(M, new float2(maxRayLength, M.y), Polygon.Vertices[contourEnum.Value], Polygon.Vertices[contourNextEnum.Value], out intersection);
                         if (!areSegmentsIntersecting)
                         {
                             continue;
@@ -86,7 +86,7 @@ namespace dousi96.Geometry.Triangulator
                         float distance = math.distance(M, intersection);
                         if (distance < distanceMI)
                         {
-                            vi = contournEnum;
+                            vi = contourEnum;
                             I = intersection;
                             distanceMI = distance;
                         }
@@ -107,19 +107,19 @@ namespace dousi96.Geometry.Triangulator
                         //Search the reflex vertices of the outer polygon (not including P if it happens to be reflex)                    
                         float minAngle = float.MaxValue;
                         float minDist = float.MaxValue;
-                        for (NativeLinkedList<int>.Enumerator contournEnum = VertexIndexLinkedList.Head;
-                            contournEnum.IsValid;
-                            contournEnum.MoveNext())
+                        for (NativeLinkedList<int>.Enumerator contourEnum = VertexIndexLinkedList.Head;
+                            contourEnum.IsValid;
+                            contourEnum.MoveNext())
                         {
                             //not including P
-                            if (contournEnum == P)
+                            if (contourEnum == P)
                             {
                                 continue;
                             }
 
-                            int currentIndex = contournEnum.Value;
-                            int previousIndex = (!contournEnum.Prev.IsValid) ? VertexIndexLinkedList.Tail.Value : contournEnum.Prev.Value;
-                            int nextIndex = (!contournEnum.Next.IsValid) ? VertexIndexLinkedList.Head.Value : contournEnum.Next.Value;
+                            int currentIndex = contourEnum.Value;
+                            int previousIndex = (!contourEnum.Prev.IsValid) ? VertexIndexLinkedList.Tail.Value : contourEnum.Prev.Value;
+                            int nextIndex = (!contourEnum.Next.IsValid) ? VertexIndexLinkedList.Head.Value : contourEnum.Next.Value;
 
                             bool isReflex = Geometry2DUtils.IsVertexReflex(Polygon.Vertices[previousIndex], Polygon.Vertices[currentIndex], Polygon.Vertices[nextIndex], true);
                             if (!isReflex)
@@ -135,7 +135,7 @@ namespace dousi96.Geometry.Triangulator
                                 float angleRMI = math.atan2(atan2.y, atan2.x);
                                 if (angleRMI < minAngle)
                                 {
-                                    selectedBridgePoint = contournEnum;
+                                    selectedBridgePoint = contourEnum;
                                     minAngle = angleRMI;
                                 }
                                 else if (math.abs(angleRMI - minAngle) < float.Epsilon)
@@ -144,7 +144,7 @@ namespace dousi96.Geometry.Triangulator
                                     float distanceRM = math.lengthsq(atan2);
                                     if (distanceRM < minDist)
                                     {
-                                        selectedBridgePoint = contournEnum;
+                                        selectedBridgePoint = contourEnum;
                                         minDist = distanceRM;
                                     }
                                 }

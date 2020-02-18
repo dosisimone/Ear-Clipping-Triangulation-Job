@@ -23,7 +23,7 @@ public class TestEarClippingJob : MonoBehaviour
 
     private void TestEarClippingWithJob()
     {
-        Vector2[] contourn =
+        Vector2[] contour =
         {
             new Vector2(-2f, -2f),
             new Vector2(+2f, -2f),
@@ -58,7 +58,7 @@ public class TestEarClippingJob : MonoBehaviour
             },
         };
 
-        PolygonJobData polygon = new PolygonJobData(contourn, holes, Allocator.TempJob);
+        PolygonJobData polygon = new PolygonJobData(contour, holes, Allocator.TempJob);
 
         int totNumVerts = polygon.NumHoles * 2 + polygon.NumTotVertices;
         int ntris = (totNumVerts - 2) * 3;
