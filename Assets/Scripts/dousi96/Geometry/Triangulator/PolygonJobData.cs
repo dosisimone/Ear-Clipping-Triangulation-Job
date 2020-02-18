@@ -19,7 +19,6 @@ namespace dousi96.Geometry.Triangulator
         [ReadOnly]
         public readonly NativeArray<int> NumPointsPerHole;
         public int NumHoles { get => StartPointsHoles.Length; }
-        public NativeSlice<float2> Contourn { get => Vertices.Slice(0, NumContournPoints); }
 
         public PolygonJobData(Vector2[] contourn, Allocator allocator)
         {

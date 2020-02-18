@@ -1,5 +1,7 @@
-﻿using Unity.Mathematics;
+﻿using UnityEngine;
+using Unity.Mathematics;
 using Unity.Burst;
+using Unity.Collections;
 
 namespace dousi96.Geometry 
 {
@@ -72,8 +74,8 @@ namespace dousi96.Geometry
             float t = QminusPxS / RxS;
             float u = QminusPxR / RxS;            
 
-            bool isRxS0 = math.abs(RxS) <= float.Epsilon;
-            bool isQminusPxR0 = math.abs(QminusPxR) <= float.Epsilon;
+            bool isRxS0 = math.abs(RxS) < float.Epsilon;
+            bool isQminusPxR0 = math.abs(QminusPxR) < float.Epsilon;
             if (isRxS0 && isQminusPxR0)
             {
                 //collinear
@@ -96,6 +98,53 @@ namespace dousi96.Geometry
         public static float Cross2D(float2 a, float2 b)
         {
             return math.mul(a.x, b.y) - math.mul(a.y, b.x);
+        }
+
+        public static float Cross2D(Vector2 a, Vector2 b)
+        {
+            return a.x * b.y - a.y * b.x;
+        }
+
+        [BurstCompile]
+        public static bool SamePoints(float2 a, float2 b)
+        {
+            return math.distance(a, b) < float.Epsilon;
+        }
+
+        [BurstCompile]
+        public static float SignedArea(NativeArray<float2> polygon)
+        {
+            float result = 0;
+            for (int index = 0; index < polygon.Length; ++index)
+            {
+                int nextIndex = (index + 1) % polygon.Length;
+                result += Cross2D(polygon[index], polygon[nextIndex]);
+            }
+            result /= 2f;
+            return result;
+        }
+
+        public static float SignedArea(Vector2[] polygon)
+        {
+            float result = 0;
+            for (int index = 0; index < polygon.Length; ++index)
+            {
+                int nextIndex = (index + 1) % polygon.Length;
+                result += Cross2D(polygon[index], polygon[nextIndex]);
+            }
+            result /= 2f;
+            return result;
+        }
+
+        [BurstCompile]
+        public static bool PointsAreClockWise(NativeArray<float2> points)
+        {
+            return SignedArea(points) > 0;
+        }
+
+        public static bool PointsAreClockWise(Vector2[] points)
+        {
+            return SignedArea(points) > 0;
         }
     }
 }

@@ -93,7 +93,7 @@ namespace dousi96.Geometry.Triangulator
                     }
 
                     NativeLinkedList<int>.Enumerator selectedBridgePoint;
-                    if (math.distance(I, Polygon.Vertices[vi.Value]) <= float.Epsilon)
+                    if (Geometry2DUtils.SamePoints(I, Polygon.Vertices[vi.Value]))
                     {
                         //I is a vertex of the outer polygon
                         selectedBridgePoint = vi;
@@ -117,28 +117,28 @@ namespace dousi96.Geometry.Triangulator
                                 continue;
                             }
 
-                            int iReflexCur = contournEnum.Value;
-                            int iReflexPrev = (!contournEnum.Prev.IsValid) ? VertexIndexLinkedList.Tail.Value : contournEnum.Prev.Value;
-                            int iReflexNext = (!contournEnum.Next.IsValid) ? VertexIndexLinkedList.Head.Value : contournEnum.Next.Value;
+                            int currentIndex = contournEnum.Value;
+                            int previousIndex = (!contournEnum.Prev.IsValid) ? VertexIndexLinkedList.Tail.Value : contournEnum.Prev.Value;
+                            int nextIndex = (!contournEnum.Next.IsValid) ? VertexIndexLinkedList.Head.Value : contournEnum.Next.Value;
 
-                            bool isReflex = Geometry2DUtils.IsVertexReflex(Polygon.Vertices[iReflexPrev], Polygon.Vertices[iReflexCur], Polygon.Vertices[iReflexNext], true);
+                            bool isReflex = Geometry2DUtils.IsVertexReflex(Polygon.Vertices[previousIndex], Polygon.Vertices[currentIndex], Polygon.Vertices[nextIndex], true);
                             if (!isReflex)
                             {
                                 continue;
                             }
 
-                            bool isReflexVertexInsideMIPTriangle = Geometry2DUtils.IsInsideTriangle(Polygon.Vertices[iReflexCur], M, I, Polygon.Vertices[P.Value]);
+                            bool isReflexVertexInsideMIPTriangle = Geometry2DUtils.IsInsideTriangle(Polygon.Vertices[currentIndex], M, I, Polygon.Vertices[P.Value]);
                             if (isReflexVertexInsideMIPTriangle)
                             {
                                 //search for the reflex vertex R that minimizes the angle between (1,0) and the line segment M-R
-                                float2 atan2 = Polygon.Vertices[iReflexCur] - M;
+                                float2 atan2 = Polygon.Vertices[currentIndex] - M;
                                 float angleRMI = math.atan2(atan2.y, atan2.x);
                                 if (angleRMI < minAngle)
                                 {
                                     selectedBridgePoint = contournEnum;
                                     minAngle = angleRMI;
                                 }
-                                else if (math.abs(angleRMI - minAngle) <= float.Epsilon)
+                                else if (math.abs(angleRMI - minAngle) < float.Epsilon)
                                 {
                                     //same angle
                                     float distanceRM = math.lengthsq(atan2);
