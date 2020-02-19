@@ -9,11 +9,6 @@ public class TestEarClippingJob : MonoBehaviour
 {
     MeshFilter filter;
 
-    PolygonJobData polygon;
-    NativeArray<int> outTriangles;
-
-    JobHandle handleTriangulatorJob;
-
     private void Start()
     {
         filter = GetComponent<MeshFilter>();
