@@ -56,6 +56,6 @@ Consider to take a look at the [TestEarClippingJob script](./Assets/Scripts/Test
 
 ### Limitations
 
-The implementation of this algorithm inside the Unity's job system is based on the [Jackson Dunstan](http://github.com/jacksondunstan) implementation of the Linked List data structure as a native collection.
+The implementation of this algorithm inside the Unity job system is based on the [Jackson Dunstan](http://github.com/jacksondunstan) implementation of the Linked List data structure as a native collection.
 [Here the link](http://github.com/jacksondunstan/NativeCollections) to the Jackson Dunstan repository containing his implementation of the Linked List data structure and many other data structures.
 To use this implementation of the Triangulation by Ear Clipping you need to enable the "unsafe" code execution inside the Unity project settings.
