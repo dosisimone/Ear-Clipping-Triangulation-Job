@@ -1,11 +1,10 @@
 ﻿using UnityEngine;
-using Unity.Mathematics;
 using Unity.Burst;
-using Unity.Collections;
+using Unity.Mathematics;
 
-namespace dousi96.Geometry 
+namespace dousi96.Geometry
 {
-    public static class Geometry2DUtils
+    public static class Math2DUtils
     {
         [BurstCompile]
         public static bool IsVertexConvex(float2 prevP0, float2 P0, float2 nextP0, bool isCCW)
@@ -40,24 +39,12 @@ namespace dousi96.Geometry
         }
 
         [BurstCompile]
-        public static float TriangleArea(float2 p0, float2 p1, float2 p2)
+        public static bool IsInsideTriangle(float2 p, float2 a, float2 b, float2 c)
         {
-            return math.mul(
-                math.abs(
-                    math.mul(p0.x, (p1.y - p2.y)) +
-                    math.mul(p1.x, (p2.y - p0.y)) +
-                    math.mul(p2.x, (p0.y - p1.y))
-                ), 0.5f);
-        }
-
-        [BurstCompile]
-        public static bool IsInsideTriangle(float2 p, float2 t0, float2 t1, float2 t2)
-        {
-            float A = TriangleArea(t0, t1, t2);
-            float Apt1t2 = TriangleArea(p, t1, t2);
-            float At0pt2 = TriangleArea(t0, p, t2);
-            float At0t1p = TriangleArea(t0, t1, p);
-            return math.abs(A - Apt1t2 - At0pt2 - At0t1p) <= float.Epsilon;
+            float doubleArea = (-b.y * c.x + a.y * (-b.x + c.x) + a.x * (b.y - c.y) + b.x * c.y);
+            float s = 1 / (doubleArea) * (a.y * c.x - a.x * c.y + (c.y - a.y) * p.x + (a.x - c.x) * p.y);
+            float t = 1 / (doubleArea) * (a.x * b.y - a.y * b.x + (a.y - b.y) * p.x + (b.x - a.x) * p.y);
+            return s >= 0 && t >= 0 && (s + t) <= 1;
         }
 
         [BurstCompile]
@@ -72,7 +59,7 @@ namespace dousi96.Geometry
             float QminusPxR = Cross2D(b0 - a0, r);
             float QminusPxS = Cross2D(b0 - a0, s);
             float t = QminusPxS / RxS;
-            float u = QminusPxR / RxS;            
+            float u = QminusPxR / RxS;
 
             bool isRxS0 = math.abs(RxS) < float.Epsilon;
             bool isQminusPxR0 = math.abs(QminusPxR) < float.Epsilon;
@@ -85,7 +72,7 @@ namespace dousi96.Geometry
                 //parallel lines
                 return false;
             }
-            else if (!isRxS0 && t >= 0 && t <=1 && u >= 0 && u <= 1)
+            else if (!isRxS0 && t >= 0 && t <= 1 && u >= 0 && u <= 1)
             {
                 intersection = a0 + t * r;
                 return true;
@@ -108,43 +95,13 @@ namespace dousi96.Geometry
         [BurstCompile]
         public static bool SamePoints(float2 a, float2 b)
         {
-            return math.distance(a, b) < float.Epsilon;
+            return math.distance(a, b) <= float.Epsilon;
         }
 
         [BurstCompile]
-        public static float SignedArea(NativeArray<float2> polygon)
+        public static float LineSide(float2 p, float2 a, float2 b)
         {
-            float result = 0;
-            for (int index = 0; index < polygon.Length; ++index)
-            {
-                int nextIndex = (index + 1) % polygon.Length;
-                result += Cross2D(polygon[index], polygon[nextIndex]);
-            }
-            result /= 2f;
-            return result;
-        }
-
-        public static float SignedArea(Vector2[] polygon)
-        {
-            float result = 0;
-            for (int index = 0; index < polygon.Length; ++index)
-            {
-                int nextIndex = (index + 1) % polygon.Length;
-                result += Cross2D(polygon[index], polygon[nextIndex]);
-            }
-            result /= 2f;
-            return result;
-        }
-
-        [BurstCompile]
-        public static bool PointsAreClockWise(NativeArray<float2> points)
-        {
-            return SignedArea(points) > 0;
-        }
-
-        public static bool PointsAreClockWise(Vector2[] points)
-        {
-            return SignedArea(points) > 0;
+            return math.mul((b.x - a.x), (p.y - a.y)) - math.mul((b.y - a.y), (p.x - a.x));
         }
     }
 }

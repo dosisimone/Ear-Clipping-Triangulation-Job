@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using Unity.Jobs;
 using Unity.Collections;
+using dousi96.Geometry;
 using dousi96.Geometry.Triangulator;
 
 [RequireComponent(typeof(MeshFilter))]
@@ -22,44 +23,40 @@ public class TestEarClippingJob : MonoBehaviour
         {
             new Vector2(-2f, -2f),
             new Vector2(+2f, -2f),
-            new Vector2(+3f, +0f),
             new Vector2(+2f, +2f),
             new Vector2(-2f, +2f),
-            new Vector2(-3f, +0f),
         };
 
         Vector2[][] holes = new Vector2[][]
         {
             new Vector2[]
             {
-                new Vector2(-1f, -0.75f),
-                new Vector2(-1f, +0.75f),
-                new Vector2(+0f, +1f),
-                new Vector2(-0.5f, 0f),
-                new Vector2(+0f, -1f),
+                new Vector2(+1f, +1.5f),
+                new Vector2(+1f, +1.75f),
+                new Vector2(+1.5f, +1.5f),
             },
             new Vector2[]
             {
-                new Vector2(+1f, +1f),
-                new Vector2(+2f, +0f),
-                new Vector2(+1f, -1f),
+                new Vector2(-1.5f, +1.1f),
+                new Vector2(-1.5f, +1.4f),
+                new Vector2(-1.25f, +1.1f),
             },
+
             new Vector2[]
             {
-                new Vector2(-1.25f, +0.5f),
-                new Vector2(-1.5f, +0f),
-                new Vector2(-1.25f, -0.5f),
-                new Vector2(-2.5f, +0f),                
-            },
+                new Vector2(-0.5f, +0f),
+                new Vector2(-0.5f, +0.5f),
+                new Vector2(+0f, +0f),
+            }
         };
 
-        PolygonJobData polygon = new PolygonJobData(contour, holes, Allocator.TempJob);
+        SinglePolygonData polygon = new SinglePolygonData(Allocator.TempJob, contour, holes);
 
-        int totNumVerts = polygon.NumHoles * 2 + polygon.NumTotVertices;
+        int totNumVerts = polygon.HolesNum * 2 + polygon.VerticesNum;
         int ntris = (totNumVerts - 2) * 3;
         NativeArray<int> outTriangles = new NativeArray<int>(ntris, Allocator.TempJob);
 
-        EarClippingTriangulatorJob triangulatorJob = new EarClippingTriangulatorJob()
+        ECTriangulatorJob triangulatorJob = new ECTriangulatorJob()
         {
             Polygon = polygon,
             OutTriangles = outTriangles
@@ -70,10 +67,10 @@ public class TestEarClippingJob : MonoBehaviour
         handleTriangulatorJob.Complete();
 
         //get the job results
-        Vector3[] vertices = new Vector3[polygon.NumTotVertices];
-        for (int i = 0; i < polygon.NumTotVertices; ++i)
+        Vector3[] vertices = new Vector3[polygon.VerticesNum];
+        for (int i = 0; i < polygon.VerticesNum; ++i)
         {
-            vertices[i] = new Vector3(polygon.Vertices[i].x, polygon.Vertices[i].y, 0f);
+            vertices[i] = new Vector3(polygon[i].x, polygon[i].y, 0f);
         }
 
         int[] triangles = new int[outTriangles.Length];
