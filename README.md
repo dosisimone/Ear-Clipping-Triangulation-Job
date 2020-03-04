@@ -5,10 +5,10 @@ The basic algorithm is explained in [this paper](http://www.geometrictools.com/D
 
 ## How to use it
 
-Define and init the ```PolygonJobData``` structure using the constructor available.
+Define and init the ```SinglePolygonData``` structure using the constructor available.
 
 ```C#
-PolygonJobData (Allocator allocator, Vector2[] contourn, Vector2[][] holes = null)
+SinglePolygonData (Allocator allocator, Vector2[] contourn, Vector2[][] holes = null)
 ```
 
 The contourn points array must be in **counter clockwise order**.
@@ -23,7 +23,7 @@ int ntris = (totNumVerts - 2) * 3;
 NativeArray<int> outTriangles = new NativeArray<int>(ntris, Allocator.TempJob);
 ```
 
-Create and schedule the ```EarClippingTriangulatorJob```.
+Create and schedule the ```ECTriangulatorJob```.
 
 ```C#
 ECTriangulatorJob triangulatorJob = new ECTriangulatorJob()
