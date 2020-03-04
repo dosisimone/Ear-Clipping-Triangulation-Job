@@ -1,6 +1,7 @@
 {
   "dependencies": {
-    "com.unity.jobs": "0.2.4-preview.11",
+    "com.jacksondunstan.native-collections": "https://github.com/jacksondunstan/NativeCollections.git",
+    "com.unity.jobs": "0.2.6-preview.13",
     "com.unity.render-pipelines.universal": "7.1.8",
     "com.unity.ugui": "1.0.0",
     "com.unity.modules.ai": "1.0.0",
@@ -34,5 +35,11 @@
     "com.unity.modules.vr": "1.0.0",
     "com.unity.modules.wind": "1.0.0",
     "com.unity.modules.xr": "1.0.0"
+  },
+  "lock": {
+    "com.jacksondunstan.native-collections": {
+      "revision": "HEAD",
+      "hash": "cc67ccffbab992cea83b50ce3cec840f0d21613a"
+    }
   }
 }
