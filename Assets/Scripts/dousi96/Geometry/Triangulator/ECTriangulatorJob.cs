@@ -160,15 +160,12 @@ namespace dousi96.Geometry.Triangulator
                     }
                 }
 
-                int holeStartIndex = hole.HoleFirstIndex;
-                int holeLength = hole.HoleLength;
-                int holeEndIndex = holeStartIndex + holeLength;
                 hullVertices.InsertAfter(selectedHullBridgePoint, selectedHullBridgePoint.Value);
-                for (int i = hole.BridgePointIndex, count = 0;
-                    count < holeLength;
-                    ++count, i = (i == holeStartIndex) ? holeEndIndex - 1 : i - 1)
+                for (int i = hole.BridgePointIndex - hole.HoleFirstIndex, count = 0;
+                    count < hole.HoleLength;
+                    i = (i + hole.HoleLength - 1) % hole.HoleLength, ++count)
                 {
-                    hullVertices.InsertAfter(selectedHullBridgePoint, i);
+                    hullVertices.InsertAfter(selectedHullBridgePoint, i + hole.HoleFirstIndex);
                 }
                 hullVertices.InsertAfter(selectedHullBridgePoint, hole.BridgePointIndex);
             }
@@ -178,7 +175,6 @@ namespace dousi96.Geometry.Triangulator
             Triangulate(hullVertices);
             hullVertices.Dispose();
         }
-
 
         private NativeLinkedList<int> StorePolygonContourAsLinkedList()
         {
