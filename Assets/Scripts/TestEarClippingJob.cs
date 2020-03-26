@@ -3,6 +3,8 @@ using Unity.Jobs;
 using Unity.Collections;
 using dousi96.Geometry;
 using dousi96.Geometry.Triangulator;
+using System.IO;
+using System.Collections.Generic;
 
 [RequireComponent(typeof(MeshFilter))]
 [RequireComponent(typeof(MeshRenderer))]
@@ -19,36 +21,74 @@ public class TestEarClippingJob : MonoBehaviour
 
     private void TestEarClippingWithJob()
     {
-        Vector2[] contour =
-        {
-            new Vector2(-2f, -2f),
-            new Vector2(+2f, -2f),
-            new Vector2(+2f, +2f),
-            new Vector2(-2f, +2f),
-        };
+        //Vector2[] contour =
+        //{
+        //    new Vector2(-2f, -2f),
+        //    new Vector2(+2f, -2f),
+        //    new Vector2(+2f, +2f),
+        //    new Vector2(-2f, +2f),
+        //};
 
-        Vector2[][] holes = new Vector2[][]
-        {
-            new Vector2[]
-            {
-                new Vector2(+1f, +1.5f),
-                new Vector2(+1f, +1.75f),
-                new Vector2(+1.5f, +1.5f),
-            },
-            new Vector2[]
-            {
-                new Vector2(-1.5f, +1.1f),
-                new Vector2(-1.5f, +1.4f),
-                new Vector2(-1.25f, +1.1f),
-            },
+        //Vector2[][] holes = new Vector2[][]
+        //{
+        //    new Vector2[]
+        //    {
+        //        new Vector2(+1f, +1.5f),
+        //        new Vector2(+1f, +1.75f),
+        //        new Vector2(+1.5f, +1.5f),
+        //    },
+        //    new Vector2[]
+        //    {
+        //        new Vector2(-1.5f, +1.1f),
+        //        new Vector2(-1.5f, +1.4f),
+        //        new Vector2(-1.25f, +1.1f),
+        //    },
 
-            new Vector2[]
+        //    new Vector2[]
+        //    {
+        //        new Vector2(-0.5f, +0f),
+        //        new Vector2(-0.5f, +0.5f),
+        //        new Vector2(+0f, +0f),
+        //    }
+        //};
+
+
+
+        string json = File.ReadAllText("./Assets/1731.dat");
+        var flatpolygon = JsonUtility.FromJson<PolygonSerializer.FlatPolygon>(json);
+
+        int numberOfHoles = flatpolygon.holeIndices.Length;
+        //int numberOfHoles = 200;
+
+        Vector2[] contour = new Vector2[flatpolygon.holeIndices[0] - 1];
+        Vector2[][] holes = new Vector2[numberOfHoles][];
+
+        for (int i = 0; i < flatpolygon.holeIndices[0] - 1; i++)
+        {
+            contour[i].x = flatpolygon.PolygonData[i].x / 10000;
+            contour[i].y = flatpolygon.PolygonData[i].y / 10000;
+        }
+        List<Vector2> temp = new List<Vector2>();
+        temp.AddRange(contour);
+        temp.Reverse();
+        contour = temp.ToArray();
+
+        for (int i = 0; i < numberOfHoles; i++)
+        {
+            int start = flatpolygon.holeIndices[i];
+            int stop = i < flatpolygon.holeIndices.Length-1 ? flatpolygon.holeIndices[i+1] : flatpolygon.PolygonData.Length;
+            holes[i] = new Vector2[stop - start];
+            for (int j = start; j < stop; j++)
             {
-                new Vector2(-0.5f, +0f),
-                new Vector2(-0.5f, +0.5f),
-                new Vector2(+0f, +0f),
+                holes[i][j- start].x = flatpolygon.PolygonData[j].x / 10000;
+                holes[i][j- start].y = flatpolygon.PolygonData[j].y / 10000;
             }
-        };
+            temp = new List<Vector2>();
+            temp.AddRange(holes[i]);
+            temp.Reverse();
+            holes[i] = temp.ToArray();
+        }
+
 
         SinglePolygonData polygon = new SinglePolygonData(Allocator.TempJob, contour, holes);
 
